@@ -1,4 +1,4 @@
-package rubenbaskaran.com.soundrecorderapp.Fragments;
+package rubenbaskaran.com.datarecorderapp.Fragments;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -9,8 +9,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import rubenbaskaran.com.soundrecorderapp.BusinessLogic.EditRecordingManager;
-import rubenbaskaran.com.soundrecorderapp.R;
+import rubenbaskaran.com.datarecorderapp.BusinessLogic.EditRecordingManager;
+import rubenbaskaran.com.datarecorderapp.R;
 
 /**
  * Created by Ruben on 19-07-2017.

@@ -1,4 +1,4 @@
-package rubenbaskaran.com.soundrecorderapp.Models;
+package rubenbaskaran.com.datarecorderapp.Models;
 
 /**
  * Created by Ruben on 14-07-2017.

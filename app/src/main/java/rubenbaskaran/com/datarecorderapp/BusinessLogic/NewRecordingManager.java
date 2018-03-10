@@ -1,4 +1,4 @@
-package rubenbaskaran.com.soundrecorderapp.BusinessLogic;
+package rubenbaskaran.com.datarecorderapp.BusinessLogic;
 
 import android.content.Context;
 import android.media.AudioFormat;
@@ -19,8 +19,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import rubenbaskaran.com.soundrecorderapp.DataAccess.DatabaseManager;
-import rubenbaskaran.com.soundrecorderapp.Models.Recording;
+import rubenbaskaran.com.datarecorderapp.DataAccess.DatabaseManager;
+import rubenbaskaran.com.datarecorderapp.Models.Recording;
 
 /**
  * Created by Ruben on 19-07-2017.

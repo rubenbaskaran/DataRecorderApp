@@ -1,4 +1,4 @@
-package rubenbaskaran.com.soundrecorderapp.BusinessLogic;
+package rubenbaskaran.com.datarecorderapp.BusinessLogic;
 
 import android.content.Context;
 import android.support.v4.app.FragmentTransaction;
@@ -9,9 +9,9 @@ import android.widget.Toast;
 
 import java.io.File;
 
-import rubenbaskaran.com.soundrecorderapp.DataAccess.DatabaseManager;
-import rubenbaskaran.com.soundrecorderapp.Fragments.SavedRecordingsFragment;
-import rubenbaskaran.com.soundrecorderapp.R;
+import rubenbaskaran.com.datarecorderapp.DataAccess.DatabaseManager;
+import rubenbaskaran.com.datarecorderapp.Fragments.SavedRecordingsFragment;
+import rubenbaskaran.com.datarecorderapp.R;
 
 /**
  * Created by Ruben on 20-07-2017.

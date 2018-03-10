@@ -1,4 +1,4 @@
-package rubenbaskaran.com.soundrecorderapp;
+package rubenbaskaran.com.datarecorderapp;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -15,9 +15,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import rubenbaskaran.com.soundrecorderapp.Fragments.AboutFragment;
-import rubenbaskaran.com.soundrecorderapp.Fragments.NewRecordingFragment;
-import rubenbaskaran.com.soundrecorderapp.Fragments.SavedRecordingsFragment;
+import rubenbaskaran.com.datarecorderapp.Fragments.AboutFragment;
+import rubenbaskaran.com.datarecorderapp.Fragments.NewRecordingFragment;
+import rubenbaskaran.com.datarecorderapp.Fragments.SavedRecordingsFragment;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener
 {

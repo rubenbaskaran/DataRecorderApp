@@ -1,4 +1,4 @@
-package rubenbaskaran.com.soundrecorderapp.Adapters;
+package rubenbaskaran.com.datarecorderapp.Adapters;
 
 import android.content.Context;
 import android.support.annotation.LayoutRes;
@@ -12,8 +12,8 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import rubenbaskaran.com.soundrecorderapp.Models.Recording;
-import rubenbaskaran.com.soundrecorderapp.R;
+import rubenbaskaran.com.datarecorderapp.Models.Recording;
+import rubenbaskaran.com.datarecorderapp.R;
 
 /**
  * Created by Ruben on 14-07-2017.

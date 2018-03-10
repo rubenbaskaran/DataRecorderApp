@@ -1,4 +1,4 @@
-package rubenbaskaran.com.soundrecorderapp.BusinessLogic;
+package rubenbaskaran.com.datarecorderapp.BusinessLogic;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -9,10 +9,10 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.List;
 
-import rubenbaskaran.com.soundrecorderapp.DataAccess.DatabaseManager;
-import rubenbaskaran.com.soundrecorderapp.Fragments.EditRecordingFragment;
-import rubenbaskaran.com.soundrecorderapp.Models.Recording;
-import rubenbaskaran.com.soundrecorderapp.R;
+import rubenbaskaran.com.datarecorderapp.DataAccess.DatabaseManager;
+import rubenbaskaran.com.datarecorderapp.Fragments.EditRecordingFragment;
+import rubenbaskaran.com.datarecorderapp.Models.Recording;
+import rubenbaskaran.com.datarecorderapp.R;
 
 /**
  * Created by Ruben on 04-08-2017.

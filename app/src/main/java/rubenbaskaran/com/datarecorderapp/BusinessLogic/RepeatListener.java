@@ -1,7 +1,6 @@
-package rubenbaskaran.com.soundrecorderapp.BusinessLogic;
+package rubenbaskaran.com.datarecorderapp.BusinessLogic;
 
 import android.os.Handler;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 

@@ -1,4 +1,4 @@
-package rubenbaskaran.com.soundrecorderapp.Fragments;
+package rubenbaskaran.com.datarecorderapp.Fragments;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -8,11 +8,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.Toast;
 
-import rubenbaskaran.com.soundrecorderapp.Adapters.RecordingAdapter;
-import rubenbaskaran.com.soundrecorderapp.BusinessLogic.SavedRecordingsManager;
-import rubenbaskaran.com.soundrecorderapp.R;
+import rubenbaskaran.com.datarecorderapp.Adapters.RecordingAdapter;
+import rubenbaskaran.com.datarecorderapp.BusinessLogic.SavedRecordingsManager;
+import rubenbaskaran.com.datarecorderapp.R;
 
 /**
  * Created by Ruben on 14-07-2017.

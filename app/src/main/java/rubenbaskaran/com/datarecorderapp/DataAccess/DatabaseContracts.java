@@ -1,4 +1,4 @@
-package rubenbaskaran.com.soundrecorderapp.DataAccess;
+package rubenbaskaran.com.datarecorderapp.DataAccess;
 
 import android.provider.BaseColumns;
 
