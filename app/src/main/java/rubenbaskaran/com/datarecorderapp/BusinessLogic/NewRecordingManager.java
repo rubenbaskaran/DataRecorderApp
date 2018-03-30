@@ -140,6 +140,12 @@ public class NewRecordingManager
         }
     }
 
+    public void RecordMotion()
+    {
+        // TODO: Append accelerometer data to stringbuilder
+        // TODO: Write stringbuilder content to .txt file
+    }
+
     private class AsyncVisualDecrementation extends AsyncTask
     {
         @Override

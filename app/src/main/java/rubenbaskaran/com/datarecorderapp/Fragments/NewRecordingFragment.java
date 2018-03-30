@@ -24,12 +24,23 @@ import rubenbaskaran.com.datarecorderapp.R;
 public class NewRecordingFragment extends Fragment
 {
     private NewRecordingManager newRecordingManager;
+    DataTypes dataType = DataTypes.Audio;
+    private Button audioButton;
+    private Button motionButton;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState)
     {
         ViewGroup root = (ViewGroup) inflater.inflate(R.layout.new_recording_fragment, null);
+
+        audioButton = root.findViewById(R.id.audioButton);
+        audioButton.setOnClickListener(DataInputType);
+        audioButton.setEnabled(false);
+
+        motionButton = root.findViewById(R.id.motionButton);
+        motionButton.setOnClickListener(DataInputType);
+        motionButton.setEnabled(true);
 
         TextView secondsTextView = root.findViewById(R.id.seconds_text_view);
         secondsTextView.setFilters(new InputFilter[]{new InputFilter.LengthFilter(2)});
@@ -77,7 +88,6 @@ public class NewRecordingFragment extends Fragment
         }
 
         newRecordingManager = new NewRecordingManager(incrementBtn, decrementBtn, recordBtn, stopBtn, secondsTextView, recordingTitleEditView, getContext());
-
         return root;
     }
 
@@ -86,7 +96,14 @@ public class NewRecordingFragment extends Fragment
         @Override
         public void onClick(View view)
         {
-            newRecordingManager.Record();
+            if (dataType.equals(DataTypes.Audio))
+            {
+                newRecordingManager.Record();
+            }
+            else if (dataType.equals(DataTypes.Motion))
+            {
+                newRecordingManager.RecordMotion();
+            }
         }
     };
 
@@ -128,4 +145,31 @@ public class NewRecordingFragment extends Fragment
             newRecordingManager.Decrement();
         }
     });
+
+    View.OnClickListener DataInputType = new View.OnClickListener()
+    {
+        @Override
+        public void onClick(View v)
+        {
+            if (v.getTag().equals("audio"))
+            {
+                audioButton.setEnabled(false);
+                motionButton.setEnabled(true);
+                dataType = DataTypes.Audio;
+            }
+            else if (v.getTag().equals("motion"))
+            {
+                audioButton.setEnabled(true);
+                motionButton.setEnabled(false);
+                dataType = DataTypes.Motion;
+            }
+        }
+    };
+
+    private enum DataTypes
+    {
+        Audio, Motion
+    }
 }
+
+
