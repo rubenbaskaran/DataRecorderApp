@@ -194,5 +194,5 @@
         android:layout_weight="1.25"
         android:gravity="center"
         android:text="X, Y, Z"
-        android:textSize="20sp"/>
+        android:textSize="30sp"/>
 </LinearLayout>

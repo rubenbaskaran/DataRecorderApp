@@ -224,7 +224,7 @@ public class NewRecordingManager
             {
                 if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER && recordMotionData == true)
                 {
-                    String value = String.format("%.2f", event.values[0]) + "," + String.format("%.2f", event.values[1]) + "," + String.format("%.2f", event.values[2]);
+                    String value = String.format("%.2f", event.values[0]) + "  ,  " + String.format("%.2f", event.values[1]) + "  ,  " + String.format("%.2f", event.values[2]);
                     motionStringBuilder.append(value);
                     motionStringBuilder.append("\n");
 
