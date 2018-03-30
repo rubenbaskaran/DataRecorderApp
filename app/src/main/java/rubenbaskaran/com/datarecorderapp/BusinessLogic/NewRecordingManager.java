@@ -2,6 +2,10 @@ package rubenbaskaran.com.datarecorderapp.BusinessLogic;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
@@ -51,8 +55,14 @@ public class NewRecordingManager
     private String filepath;
     private String title;
     private DataTypes dataType;
+    private boolean recordMotionData;
+    private final StringBuilder motionStringBuilder = new StringBuilder();
+    private SensorManager sensorManager;
+    private SensorEventListener sensorEventListener;
+    private TextView motionTextView;
     //endregion
 
+    //region Constructor
     public NewRecordingManager(Button incrementBtn, Button decrementBtn, Button recordBtn, Button stopBtn, TextView secondsTextView, EditText recordingTitleEditView, Context context, DataTypes dataType)
     {
         this.dataType = dataType;
@@ -67,7 +77,9 @@ public class NewRecordingManager
         SharedPreferences sharedPreferences = context.getSharedPreferences("rubenbaskaran.com.datarecorderapp", Context.MODE_PRIVATE);
         counter = sharedPreferences.getInt("length", 0);
     }
+//endregion
 
+    //region Buttons
     public void Stop()
     {
         length = String.valueOf(startLength - counter);
@@ -113,11 +125,14 @@ public class NewRecordingManager
         if (!incrementBtn.isEnabled())
             incrementBtn.setEnabled(true);
     }
+    //endregion
 
-    public void RecordAudio()
+    //region Audio
+    public void RecordAudio(DataTypes dataType)
     {
         try
         {
+            this.dataType = dataType;
             SharedPreferences sharedPreferences = context.getSharedPreferences("rubenbaskaran.com.datarecorderapp", Context.MODE_PRIVATE);
             sharedPreferences.edit().putInt("length", counter).apply();
 
@@ -166,11 +181,15 @@ public class NewRecordingManager
             Toast.makeText(context, title + " has been saved", Toast.LENGTH_SHORT).show();
         }
     }
+    //endregion
 
-    public void RecordMotion()
+    //region Motion
+    public void RecordMotion(DataTypes dataType, TextView motionTextView)
     {
         try
         {
+            this.motionTextView = motionTextView;
+            this.dataType = dataType;
             SharedPreferences sharedPreferences = context.getSharedPreferences("rubenbaskaran.com.datarecorderapp", Context.MODE_PRIVATE);
             sharedPreferences.edit().putInt("length", counter).apply();
 
@@ -185,9 +204,6 @@ public class NewRecordingManager
 
             AsyncVisualDecrementation asyncVisualDecrementation = new AsyncVisualDecrementation();
             asyncVisualDecrementation.executeOnExecutor(asyncVisualDecrementation.THREAD_POOL_EXECUTOR);
-
-            AsyncMotionRecording asyncMotionRecording = new AsyncMotionRecording();
-            asyncMotionRecording.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
         catch (Exception e)
         {
@@ -195,31 +211,44 @@ public class NewRecordingManager
         }
     }
 
-    private class AsyncMotionRecording extends AsyncTask
+    private void StartListeningToSensorData()
     {
-        @Override
-        protected Object doInBackground(Object[] objects)
+        sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
+        Sensor sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        recordMotionData = true;
+
+        sensorEventListener = new SensorEventListener()
         {
-            while (audioRecord.getRecordingState() == AudioRecord.RECORDSTATE_RECORDING)
+            @Override
+            public void onSensorChanged(SensorEvent event)
             {
-                // TODO: Read accelerometer data and append to stringbuilder
-                audioRecord.read(audioBuffer, 0, audioBuffer.length);
+                if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER && recordMotionData == true)
+                {
+                    String value = String.format("%.2f", event.values[0]) + "," + String.format("%.2f", event.values[1]) + "," + String.format("%.2f", event.values[2]);
+                    motionStringBuilder.append(value);
+                    motionStringBuilder.append("\n");
+
+                    motionTextView.setText(String.valueOf(value));
+                }
             }
 
-            return null;
-        }
+            @Override
+            public void onAccuracyChanged(Sensor sensor, int accuracy)
+            {
+            }
+        };
 
-        @Override
-        protected void onPostExecute(Object o)
-        {
-            super.onPostExecute(o);
-            // TODO: Write content of stringbuilder to .txt file
-            audioRecord.release();
-            audioRecord = null;
-            SaveFileOnPhone();
-            Toast.makeText(context, title + " has been saved", Toast.LENGTH_SHORT).show();
-        }
+        sensorManager.registerListener(sensorEventListener, sensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
+
+    private void StopListeningToSensorData()
+    {
+        recordMotionData = false;
+        sensorManager.unregisterListener(sensorEventListener);
+        SaveFileOnPhone();
+        Toast.makeText(context, title + " has been saved", Toast.LENGTH_SHORT).show();
+    }
+    //endregion
 
     private class AsyncVisualDecrementation extends AsyncTask
     {
@@ -227,7 +256,15 @@ public class NewRecordingManager
         protected void onPreExecute()
         {
             super.onPreExecute();
-            audioRecord.startRecording();
+
+            if (dataType.equals(DataTypes.Audio))
+            {
+                audioRecord.startRecording();
+            }
+            else if (dataType.equals(DataTypes.Motion))
+            {
+                StartListeningToSensorData();
+            }
         }
 
         @Override
@@ -263,14 +300,6 @@ public class NewRecordingManager
         {
             super.onPostExecute(o);
 
-            if (dataType.equals(DataTypes.Audio))
-            {
-                audioRecord.stop();
-            }
-            else if(dataType.equals(DataTypes.Motion)){
-                // TODO: Set boolean value that stops async read on accelerometer
-            }
-
             if (recordingTitleEditView.getText().toString().isEmpty())
             {
                 title = GetCurrentDateAndTime();
@@ -280,11 +309,25 @@ public class NewRecordingManager
                 title = recordingTitleEditView.getText().toString();
             }
 
+            if (dataType.equals(DataTypes.Audio))
+            {
+                audioRecord.stop();
+            }
+            else if (dataType.equals(DataTypes.Motion))
+            {
+                StopListeningToSensorData();
+            }
+
             SaveRecordingInDb(new Recording(0, filepath, title, length + " second(s)", DateTimeNow));
 
             SharedPreferences sharedPreferences = context.getSharedPreferences("rubenbaskaran.com.datarecorderapp", Context.MODE_PRIVATE);
             counter = sharedPreferences.getInt("length", 0);
             secondsTextView.setText(String.valueOf(counter));
+
+            if (motionTextView != null)
+            {
+                motionTextView.setText("X, Y, Z");
+            }
 
             if (secondsTextView.getText().toString().equals(String.valueOf(99)))
             {
@@ -309,6 +352,39 @@ public class NewRecordingManager
             stopBtn.setEnabled(false);
             recordingTitleEditView.setEnabled(true);
             recordingTitleEditView.setHint("Set title...");
+        }
+    }
+
+    //region Helper methods
+    private void SaveFileOnPhone()
+    {
+        File file = new File(filepath);
+        StringBuilder stringBuilder = null;
+
+        if (dataType.equals(DataTypes.Audio))
+        {
+            stringBuilder = new StringBuilder();
+
+            for (short value : audioBuffer)
+            {
+                stringBuilder.append(value);
+                stringBuilder.append("\n");
+            }
+        }
+        else if (dataType.equals(DataTypes.Motion))
+        {
+            stringBuilder = motionStringBuilder;
+        }
+
+        try
+        {
+            FileWriter fileWriter = new FileWriter(file);
+            fileWriter.append(stringBuilder);
+            fileWriter.close();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
         }
     }
 
@@ -341,36 +417,12 @@ public class NewRecordingManager
         return true;
     }
 
-    private void SaveFileOnPhone()
-    {
-        File file = new File(filepath);
-        StringBuilder stringBuilder = new StringBuilder();
-
-        for (short value : audioBuffer)
-        {
-            stringBuilder.append(value);
-            stringBuilder.append("\n");
-        }
-
-        try
-        {
-            FileWriter fileWriter = new FileWriter(file);
-            fileWriter.append(stringBuilder);
-            fileWriter.close();
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-    }
-
     private void SaveRecordingInDb(Recording newRecording)
     {
         DatabaseManager dbMgr = new DatabaseManager(context);
         dbMgr.CreateRecording(newRecording);
     }
 
-    //region Helper methods
     private Boolean InitializeMediaRecorder()
     {
         try

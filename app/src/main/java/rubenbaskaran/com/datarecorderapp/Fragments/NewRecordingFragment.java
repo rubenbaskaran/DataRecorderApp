@@ -28,6 +28,7 @@ public class NewRecordingFragment extends Fragment
     DataTypes dataType = DataTypes.Audio;
     private Button audioButton;
     private Button motionButton;
+    TextView motionTextView;
 
     @Nullable
     @Override
@@ -42,6 +43,8 @@ public class NewRecordingFragment extends Fragment
         motionButton = root.findViewById(R.id.motionButton);
         motionButton.setOnClickListener(DataInputType);
         motionButton.setEnabled(true);
+
+        motionTextView = root.findViewById(R.id.motionTextView);
 
         TextView secondsTextView = root.findViewById(R.id.seconds_text_view);
         secondsTextView.setFilters(new InputFilter[]{new InputFilter.LengthFilter(2)});
@@ -99,11 +102,11 @@ public class NewRecordingFragment extends Fragment
         {
             if (dataType.equals(DataTypes.Audio))
             {
-                newRecordingManager.RecordAudio();
+                newRecordingManager.RecordAudio(dataType);
             }
             else if (dataType.equals(DataTypes.Motion))
             {
-                newRecordingManager.RecordMotion();
+                newRecordingManager.RecordMotion(dataType, motionTextView);
             }
         }
     };
