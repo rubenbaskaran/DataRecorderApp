@@ -2,7 +2,6 @@ package rubenbaskaran.com.datarecorderapp.BusinessLogic;
 
 import android.content.Context;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
@@ -11,8 +10,6 @@ import android.widget.Toast;
 import java.io.File;
 
 import rubenbaskaran.com.datarecorderapp.DataAccess.DatabaseManager;
-import rubenbaskaran.com.datarecorderapp.Fragments.SavedRecordingsFragment;
-import rubenbaskaran.com.datarecorderapp.R;
 
 /**
  * Created by Ruben on 20-07-2017.
@@ -65,10 +62,6 @@ public class EditRecordingManager
         {
             Toast.makeText(context, Title + " has been deleted", Toast.LENGTH_LONG).show();
             fragmentManager.popBackStackImmediate();
-            FragmentTransaction tx = fragmentManager.beginTransaction();
-            SavedRecordingsFragment savedRecordingsFragment = new SavedRecordingsFragment();
-            tx.replace(R.id.layout_holder, savedRecordingsFragment);
-            tx.commit();
         }
         else
             Toast.makeText(context, "Failed to delete " + Title, Toast.LENGTH_LONG).show();
