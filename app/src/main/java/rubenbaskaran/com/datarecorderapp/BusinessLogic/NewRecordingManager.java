@@ -1,6 +1,7 @@
 package rubenbaskaran.com.datarecorderapp.BusinessLogic;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
@@ -36,7 +37,7 @@ public class NewRecordingManager
     //endregion
 
     //region Properties
-    private static int counter = 0;
+    private static int counter;
     private Button incrementBtn, decrementBtn, recordBtn, stopBtn;
     private TextView secondsTextView;
     private EditText recordingTitleEditView;
@@ -47,6 +48,7 @@ public class NewRecordingManager
     private AudioRecord audioRecord;
     private String DateTimeNow;
     private String filepath;
+    private String title;
     //endregion
 
     public NewRecordingManager(Button incrementBtn, Button decrementBtn, Button recordBtn, Button stopBtn, TextView secondsTextView, EditText recordingTitleEditView, Context context)
@@ -58,6 +60,9 @@ public class NewRecordingManager
         this.secondsTextView = secondsTextView;
         this.recordingTitleEditView = recordingTitleEditView;
         this.context = context;
+
+        SharedPreferences sharedPreferences = context.getSharedPreferences("rubenbaskaran.com.datarecorderapp", Context.MODE_PRIVATE);
+        counter = sharedPreferences.getInt("length", 0);
     }
 
     public void Stop()
@@ -110,6 +115,9 @@ public class NewRecordingManager
     {
         try
         {
+            SharedPreferences sharedPreferences = context.getSharedPreferences("rubenbaskaran.com.datarecorderapp", Context.MODE_PRIVATE);
+            sharedPreferences.edit().putInt("length", counter).apply();
+
             length = String.valueOf(counter);
             startLength = counter;
             audioBuffer = new short[44100 * startLength];
@@ -175,15 +183,45 @@ public class NewRecordingManager
             super.onPostExecute(o);
             audioRecord.stop();
 
-            SaveRecordingInDb(new Recording(0, filepath, recordingTitleEditView.getText().toString(), length + " second(s)", DateTimeNow));
+            if (recordingTitleEditView.getText().toString().isEmpty())
+            {
+                title = GetCurrentDateAndTime();
+            }
+            else
+            {
+                title = recordingTitleEditView.getText().toString();
+            }
 
-            counter = 0;
-            incrementBtn.setEnabled(true);
-            decrementBtn.setEnabled(false);
-            recordBtn.setEnabled(false);
+            SaveRecordingInDb(new Recording(0, filepath, title, length + " second(s)", DateTimeNow));
+
+            SharedPreferences sharedPreferences = context.getSharedPreferences("rubenbaskaran.com.datarecorderapp", Context.MODE_PRIVATE);
+            counter = sharedPreferences.getInt("length", 0);
+            secondsTextView.setText(String.valueOf(counter));
+
+
+            if (secondsTextView.getText().toString().equals(String.valueOf(99)))
+            {
+                incrementBtn.setEnabled(false);
+            }
+            else
+            {
+                incrementBtn.setEnabled(true);
+            }
+
+            if (secondsTextView.getText().toString().equals(String.valueOf(0)))
+            {
+                decrementBtn.setEnabled(false);
+                recordBtn.setEnabled(false);
+            }
+            else
+            {
+                decrementBtn.setEnabled(true);
+                recordBtn.setEnabled(true);
+            }
+
             stopBtn.setEnabled(false);
-            recordingTitleEditView.setEnabled(false);
-            recordingTitleEditView.setText("Set title...");
+            recordingTitleEditView.setEnabled(true);
+            recordingTitleEditView.setHint("Set title...");
         }
     }
 
@@ -207,7 +245,7 @@ public class NewRecordingManager
             audioRecord.release();
             audioRecord = null;
             SaveFileOnPhone();
-            Toast.makeText(context, recordingTitleEditView.getText().toString() + " has been saved", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, title + " has been saved", Toast.LENGTH_SHORT).show();
         }
     }
 

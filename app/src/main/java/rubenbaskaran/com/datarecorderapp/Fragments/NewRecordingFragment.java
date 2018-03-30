@@ -1,5 +1,7 @@
 package rubenbaskaran.com.datarecorderapp.Fragments;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -31,25 +33,48 @@ public class NewRecordingFragment extends Fragment
 
         TextView secondsTextView = root.findViewById(R.id.seconds_text_view);
         secondsTextView.setFilters(new InputFilter[]{new InputFilter.LengthFilter(2)});
-        secondsTextView.setText(String.valueOf(0));
+
+        SharedPreferences sharedPreferences = getContext().getSharedPreferences("rubenbaskaran.com.datarecorderapp", Context.MODE_PRIVATE);
+        String length = String.valueOf(sharedPreferences.getInt("length", 0));
+        secondsTextView.setText(length);
 
         Button incrementBtn = root.findViewById(R.id.increment_button);
         incrementBtn.setOnTouchListener(IncrementClickRepeatListener);
 
+        if (length.equals("99"))
+        {
+            incrementBtn.setEnabled(false);
+        }
+        else
+        {
+            incrementBtn.setEnabled(true);
+        }
+
         Button decrementBtn = root.findViewById(R.id.decrement_button);
         decrementBtn.setOnTouchListener(DecrementClickRepeatListener);
-        decrementBtn.setEnabled(false);
 
         Button recordBtn = root.findViewById(R.id.record_button);
         recordBtn.setOnClickListener(RecordClick);
-        recordBtn.setEnabled(false);
 
         EditText recordingTitleEditView = root.findViewById(R.id.title_of_recoding_edit_text);
-        recordingTitleEditView.setEnabled(false);
+
 
         Button stopBtn = root.findViewById(R.id.stop_button);
         stopBtn.setOnClickListener(StopClick);
         stopBtn.setEnabled(false);
+
+        if (length.equals("0"))
+        {
+            decrementBtn.setEnabled(false);
+            recordBtn.setEnabled(false);
+            recordingTitleEditView.setEnabled(false);
+        }
+        else
+        {
+            decrementBtn.setEnabled(true);
+            recordBtn.setEnabled(true);
+            recordingTitleEditView.setEnabled(true);
+        }
 
         newRecordingManager = new NewRecordingManager(incrementBtn, decrementBtn, recordBtn, stopBtn, secondsTextView, recordingTitleEditView, getContext());
 
