@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.Locale;
 
 import rubenbaskaran.com.datarecorderapp.DataAccess.DatabaseManager;
+import rubenbaskaran.com.datarecorderapp.Enums.DataTypes;
 import rubenbaskaran.com.datarecorderapp.Models.Recording;
 
 /**
@@ -49,10 +50,12 @@ public class NewRecordingManager
     private String DateTimeNow;
     private String filepath;
     private String title;
+    private DataTypes dataType;
     //endregion
 
-    public NewRecordingManager(Button incrementBtn, Button decrementBtn, Button recordBtn, Button stopBtn, TextView secondsTextView, EditText recordingTitleEditView, Context context)
+    public NewRecordingManager(Button incrementBtn, Button decrementBtn, Button recordBtn, Button stopBtn, TextView secondsTextView, EditText recordingTitleEditView, Context context, DataTypes dataType)
     {
+        this.dataType = dataType;
         this.incrementBtn = incrementBtn;
         this.decrementBtn = decrementBtn;
         this.recordBtn = recordBtn;
@@ -111,7 +114,7 @@ public class NewRecordingManager
             incrementBtn.setEnabled(true);
     }
 
-    public void Record()
+    public void RecordAudio()
     {
         try
         {
@@ -131,8 +134,8 @@ public class NewRecordingManager
             AsyncVisualDecrementation asyncVisualDecrementation = new AsyncVisualDecrementation();
             asyncVisualDecrementation.executeOnExecutor(asyncVisualDecrementation.THREAD_POOL_EXECUTOR);
 
-            AsyncRecording asyncRecording = new AsyncRecording();
-            asyncRecording.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            AsyncAudioRecording asyncAudioRecording = new AsyncAudioRecording();
+            asyncAudioRecording.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
         catch (Exception e)
         {
@@ -140,10 +143,82 @@ public class NewRecordingManager
         }
     }
 
+    private class AsyncAudioRecording extends AsyncTask
+    {
+        @Override
+        protected Object doInBackground(Object[] objects)
+        {
+            while (audioRecord.getRecordingState() == AudioRecord.RECORDSTATE_RECORDING)
+            {
+                audioRecord.read(audioBuffer, 0, audioBuffer.length);
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Object o)
+        {
+            super.onPostExecute(o);
+            audioRecord.release();
+            audioRecord = null;
+            SaveFileOnPhone();
+            Toast.makeText(context, title + " has been saved", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     public void RecordMotion()
     {
-        // TODO: Append accelerometer data to stringbuilder
-        // TODO: Write stringbuilder content to .txt file
+        try
+        {
+            SharedPreferences sharedPreferences = context.getSharedPreferences("rubenbaskaran.com.datarecorderapp", Context.MODE_PRIVATE);
+            sharedPreferences.edit().putInt("length", counter).apply();
+
+            length = String.valueOf(counter);
+            startLength = counter;
+
+            if (!PrepareForRecording())
+            {
+                Toast.makeText(context, "Error occurred in PrepareForRecording()", Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            AsyncVisualDecrementation asyncVisualDecrementation = new AsyncVisualDecrementation();
+            asyncVisualDecrementation.executeOnExecutor(asyncVisualDecrementation.THREAD_POOL_EXECUTOR);
+
+            AsyncMotionRecording asyncMotionRecording = new AsyncMotionRecording();
+            asyncMotionRecording.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
+        catch (Exception e)
+        {
+            Toast.makeText(context, "Error: " + e.toString(), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private class AsyncMotionRecording extends AsyncTask
+    {
+        @Override
+        protected Object doInBackground(Object[] objects)
+        {
+            while (audioRecord.getRecordingState() == AudioRecord.RECORDSTATE_RECORDING)
+            {
+                // TODO: Read accelerometer data and append to stringbuilder
+                audioRecord.read(audioBuffer, 0, audioBuffer.length);
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Object o)
+        {
+            super.onPostExecute(o);
+            // TODO: Write content of stringbuilder to .txt file
+            audioRecord.release();
+            audioRecord = null;
+            SaveFileOnPhone();
+            Toast.makeText(context, title + " has been saved", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private class AsyncVisualDecrementation extends AsyncTask
@@ -187,7 +262,14 @@ public class NewRecordingManager
         protected void onPostExecute(Object o)
         {
             super.onPostExecute(o);
-            audioRecord.stop();
+
+            if (dataType.equals(DataTypes.Audio))
+            {
+                audioRecord.stop();
+            }
+            else if(dataType.equals(DataTypes.Motion)){
+                // TODO: Set boolean value that stops async read on accelerometer
+            }
 
             if (recordingTitleEditView.getText().toString().isEmpty())
             {
@@ -203,7 +285,6 @@ public class NewRecordingManager
             SharedPreferences sharedPreferences = context.getSharedPreferences("rubenbaskaran.com.datarecorderapp", Context.MODE_PRIVATE);
             counter = sharedPreferences.getInt("length", 0);
             secondsTextView.setText(String.valueOf(counter));
-
 
             if (secondsTextView.getText().toString().equals(String.valueOf(99)))
             {
@@ -231,30 +312,6 @@ public class NewRecordingManager
         }
     }
 
-    private class AsyncRecording extends AsyncTask
-    {
-        @Override
-        protected Object doInBackground(Object[] objects)
-        {
-            while (audioRecord.getRecordingState() == AudioRecord.RECORDSTATE_RECORDING)
-            {
-                audioRecord.read(audioBuffer, 0, audioBuffer.length);
-            }
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Object o)
-        {
-            super.onPostExecute(o);
-            audioRecord.release();
-            audioRecord = null;
-            SaveFileOnPhone();
-            Toast.makeText(context, title + " has been saved", Toast.LENGTH_SHORT).show();
-        }
-    }
-
     private boolean PrepareForRecording()
     {
         incrementBtn.setEnabled(false);
@@ -273,8 +330,13 @@ public class NewRecordingManager
 
         CreateFilepathAndTimestamp(subdirectory);
 
-        if (!InitializeMediaRecorder())
-            return false;
+        if (dataType.equals(DataTypes.Audio))
+        {
+            if (!InitializeMediaRecorder())
+            {
+                return false;
+            }
+        }
 
         return true;
     }

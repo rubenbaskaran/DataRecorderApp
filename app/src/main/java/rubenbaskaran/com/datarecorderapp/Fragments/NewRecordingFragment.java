@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import rubenbaskaran.com.datarecorderapp.BusinessLogic.NewRecordingManager;
 import rubenbaskaran.com.datarecorderapp.BusinessLogic.RepeatListener;
+import rubenbaskaran.com.datarecorderapp.Enums.DataTypes;
 import rubenbaskaran.com.datarecorderapp.R;
 
 /**
@@ -87,7 +88,7 @@ public class NewRecordingFragment extends Fragment
             recordingTitleEditView.setEnabled(true);
         }
 
-        newRecordingManager = new NewRecordingManager(incrementBtn, decrementBtn, recordBtn, stopBtn, secondsTextView, recordingTitleEditView, getContext());
+        newRecordingManager = new NewRecordingManager(incrementBtn, decrementBtn, recordBtn, stopBtn, secondsTextView, recordingTitleEditView, getContext(), dataType);
         return root;
     }
 
@@ -98,7 +99,7 @@ public class NewRecordingFragment extends Fragment
         {
             if (dataType.equals(DataTypes.Audio))
             {
-                newRecordingManager.Record();
+                newRecordingManager.RecordAudio();
             }
             else if (dataType.equals(DataTypes.Motion))
             {
@@ -165,11 +166,6 @@ public class NewRecordingFragment extends Fragment
             }
         }
     };
-
-    private enum DataTypes
-    {
-        Audio, Motion
-    }
 }
 
 
