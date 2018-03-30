@@ -1,6 +1,7 @@
 package rubenbaskaran.com.datarecorderapp.BusinessLogic;
 
 import android.content.Context;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.widget.Button;
@@ -42,7 +43,7 @@ public class EditRecordingManager
         }
     }
 
-    public void DeleteRecording(Context context, FragmentTransaction fragmentTransaction, String Title, String Filepath, String Timestamp)
+    public void DeleteRecording(Context context, FragmentManager fragmentManager, String Title, String Filepath, String Timestamp)
     {
         DatabaseManager dbMgr = new DatabaseManager(context);
         dbMgr.DeleteRecording(Timestamp);
@@ -63,7 +64,8 @@ public class EditRecordingManager
         if (result)
         {
             Toast.makeText(context, Title + " has been deleted", Toast.LENGTH_LONG).show();
-            FragmentTransaction tx = fragmentTransaction;
+            fragmentManager.popBackStackImmediate();
+            FragmentTransaction tx = fragmentManager.beginTransaction();
             SavedRecordingsFragment savedRecordingsFragment = new SavedRecordingsFragment();
             tx.replace(R.id.layout_holder, savedRecordingsFragment);
             tx.commit();

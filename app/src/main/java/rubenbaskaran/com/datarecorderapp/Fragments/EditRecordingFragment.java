@@ -74,7 +74,7 @@ public class EditRecordingFragment extends Fragment
         @Override
         public void onClick(View view)
         {
-            editRecordingManager.DeleteRecording(getContext(), getFragmentManager().beginTransaction(), Title, Filepath, Timestamp);
+            editRecordingManager.DeleteRecording(getContext(), getFragmentManager(), Title, Filepath, Timestamp);
         }
     };
 }
