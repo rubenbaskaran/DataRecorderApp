@@ -99,7 +99,11 @@ public class NewRecordingManager
         Recording = false;
         length = String.valueOf(startLength - counter);
         counter = 1;
-        repeats = 1;
+
+        if(!repeatsEditText.getText().toString().equals(""))
+        {
+            repeats = 0;
+        }
     }
     //endregion
 
