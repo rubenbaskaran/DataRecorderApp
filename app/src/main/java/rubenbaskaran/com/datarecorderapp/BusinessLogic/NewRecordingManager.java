@@ -34,17 +34,27 @@ import rubenbaskaran.com.datarecorderapp.Models.Recording;
 
 public class NewRecordingManager
 {
-    //region Getters
-    public int getCounter()
+    //region Getters and setters
+    public static void setCounter(int counter)
     {
-        return counter;
+        NewRecordingManager.counter = counter;
+    }
+
+    public static void setInterval(Integer interval)
+    {
+        NewRecordingManager.interval = interval;
+    }
+
+    public static void setRepeats(Integer repeats)
+    {
+        NewRecordingManager.repeats = repeats;
     }
     //endregion
 
     //region Properties
     private static int counter;
-    private Button incrementBtn, decrementBtn, recordBtn, stopBtn;
-    private TextView secondsTextView;
+    private Button recordBtn, stopBtn;
+    private EditText secondsTextView, intervalEditText, repeatsEditText;
     private EditText recordingTitleEditView;
     private Context context;
     private String length;
@@ -53,26 +63,29 @@ public class NewRecordingManager
     private AudioRecord audioRecord;
     private String DateTimeNow;
     private String filepath;
-    private String title;
     private DataTypes dataType;
     private boolean recordMotionData;
-    private final StringBuilder motionStringBuilder = new StringBuilder();
+    private StringBuilder motionStringBuilder = new StringBuilder();
     private SensorManager sensorManager;
     private SensorEventListener sensorEventListener;
     private TextView motionTextView;
+    private static Integer interval = null;
+    private static Integer repeats = null;
+    public static Boolean Recording = false;
     //endregion
 
     //region Constructor
-    public NewRecordingManager(Button incrementBtn, Button decrementBtn, Button recordBtn, Button stopBtn, TextView secondsTextView, EditText recordingTitleEditView, Context context, DataTypes dataType)
+    public NewRecordingManager(EditText intervalEditText, EditText repeatsEditText, Button recordBtn, Button stopBtn, EditText secondsTextView, EditText recordingTitleEditView, Context context, DataTypes dataType, TextView motionTextView)
     {
         this.dataType = dataType;
-        this.incrementBtn = incrementBtn;
-        this.decrementBtn = decrementBtn;
+        this.intervalEditText = intervalEditText;
+        this.repeatsEditText = repeatsEditText;
         this.recordBtn = recordBtn;
         this.stopBtn = stopBtn;
         this.secondsTextView = secondsTextView;
         this.recordingTitleEditView = recordingTitleEditView;
         this.context = context;
+        this.motionTextView = motionTextView;
 
         SharedPreferences sharedPreferences = context.getSharedPreferences("rubenbaskaran.com.datarecorderapp", Context.MODE_PRIVATE);
         counter = sharedPreferences.getInt("length", 0);
@@ -82,48 +95,32 @@ public class NewRecordingManager
     //region Buttons
     public void Stop()
     {
+        RecordingOff();
         length = String.valueOf(startLength - counter);
         counter = 1;
+        repeats = 1;
+    }
+    //endregion
+
+    //region Userinterface
+    private void RecordingOn()
+    {
+        secondsTextView.setEnabled(false);
+        intervalEditText.setEnabled(false);
+        repeatsEditText.setEnabled(false);
+        recordBtn.setEnabled(false);
+        stopBtn.setEnabled(true);
+        recordingTitleEditView.setEnabled(false);
     }
 
-    public void Increment()
+    private void RecordingOff()
     {
-        if (counter == 99)
-            return;
-
-        counter++;
-        secondsTextView.setText(String.valueOf(counter));
-
-        if (counter == 99)
-            incrementBtn.setEnabled(false);
-
-        if (!decrementBtn.isEnabled())
-            decrementBtn.setEnabled(true);
-
-        if (!recordBtn.isEnabled())
-            recordBtn.setEnabled(true);
-
-        if (!recordingTitleEditView.isEnabled())
-            recordingTitleEditView.setEnabled(true);
-    }
-
-    public void Decrement()
-    {
-        if (counter == 0)
-            return;
-
-        counter--;
-        secondsTextView.setText(String.valueOf(counter));
-
-        if (counter == 0)
-        {
-            decrementBtn.setEnabled(false);
-            recordBtn.setEnabled(false);
-            recordingTitleEditView.setEnabled(false);
-        }
-
-        if (!incrementBtn.isEnabled())
-            incrementBtn.setEnabled(true);
+        secondsTextView.setEnabled(true);
+        intervalEditText.setEnabled(true);
+        repeatsEditText.setEnabled(true);
+        recordBtn.setEnabled(true);
+        stopBtn.setEnabled(false);
+        recordingTitleEditView.setEnabled(true);
     }
     //endregion
 
@@ -175,20 +172,15 @@ public class NewRecordingManager
         protected void onPostExecute(Object o)
         {
             super.onPostExecute(o);
-            audioRecord.release();
-            audioRecord = null;
-            SaveFileOnPhone();
-            Toast.makeText(context, title + " has been saved", Toast.LENGTH_SHORT).show();
         }
     }
     //endregion
 
     //region Motion
-    public void RecordMotion(DataTypes dataType, TextView motionTextView)
+    public void RecordMotion(DataTypes dataType)
     {
         try
         {
-            this.motionTextView = motionTextView;
             this.dataType = dataType;
             SharedPreferences sharedPreferences = context.getSharedPreferences("rubenbaskaran.com.datarecorderapp", Context.MODE_PRIVATE);
             sharedPreferences.edit().putInt("length", counter).apply();
@@ -200,6 +192,16 @@ public class NewRecordingManager
             {
                 Toast.makeText(context, "Error occurred in PrepareForRecording()", Toast.LENGTH_LONG).show();
                 return;
+            }
+
+            if (repeats == null && !repeatsEditText.getText().toString().equals("") && !repeatsEditText.getText().toString().equals("0"))
+            {
+                repeats = Integer.parseInt(repeatsEditText.getText().toString());
+
+                if (interval == null && !intervalEditText.getText().toString().equals(""))
+                {
+                    interval = Integer.parseInt(intervalEditText.getText().toString()) * 1000;
+                }
             }
 
             AsyncVisualDecrementation asyncVisualDecrementation = new AsyncVisualDecrementation();
@@ -240,14 +242,6 @@ public class NewRecordingManager
 
         sensorManager.registerListener(sensorEventListener, sensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
-
-    private void StopListeningToSensorData()
-    {
-        recordMotionData = false;
-        sensorManager.unregisterListener(sensorEventListener);
-        SaveFileOnPhone();
-        Toast.makeText(context, title + " has been saved", Toast.LENGTH_SHORT).show();
-    }
     //endregion
 
     private class AsyncVisualDecrementation extends AsyncTask
@@ -256,6 +250,8 @@ public class NewRecordingManager
         protected void onPreExecute()
         {
             super.onPreExecute();
+            RecordingOn();
+            Recording = true;
 
             if (dataType.equals(DataTypes.Audio))
             {
@@ -300,6 +296,7 @@ public class NewRecordingManager
         {
             super.onPostExecute(o);
 
+            String title;
             if (recordingTitleEditView.getText().toString().isEmpty())
             {
                 title = GetCurrentDateAndTime();
@@ -312,46 +309,73 @@ public class NewRecordingManager
             if (dataType.equals(DataTypes.Audio))
             {
                 audioRecord.stop();
+                audioRecord.release();
+                audioRecord = null;
             }
             else if (dataType.equals(DataTypes.Motion))
             {
-                StopListeningToSensorData();
+                recordMotionData = false;
+                sensorManager.unregisterListener(sensorEventListener);
             }
 
+            SaveFileOnPhone();
             SaveRecordingInDb(new Recording(0, filepath, title, length + " second(s)", DateTimeNow));
 
             SharedPreferences sharedPreferences = context.getSharedPreferences("rubenbaskaran.com.datarecorderapp", Context.MODE_PRIVATE);
             counter = sharedPreferences.getInt("length", 0);
             secondsTextView.setText(String.valueOf(counter));
 
-            if (motionTextView != null)
+            if (repeats != null && repeats > 0)
             {
-                motionTextView.setText("X, Y, Z");
+                if (interval != null && interval > 0)
+                {
+                    try
+                    {
+                        Thread.sleep(interval);
+                        repeats--;
+                        repeatsEditText.setText(Integer.toString(repeats));
+                        counter = startLength;
+                        secondsTextView.setText(Integer.toString(counter));
+
+                        if (dataType.equals(DataTypes.Motion))
+                        {
+                            RecordMotion(DataTypes.Motion);
+                            motionStringBuilder = new StringBuilder();
+                        }
+                        else if (dataType.equals(DataTypes.Audio))
+                        {
+                            RecordAudio(DataTypes.Audio);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Log.e("Error", "Couldn't execute Thread.sleep()");
+                    }
+                }
+                else
+                {
+                    repeats--;
+                    repeatsEditText.setText(Integer.toString(repeats));
+                    counter = startLength;
+                    secondsTextView.setText(Integer.toString(counter));
+
+                    if (dataType.equals(DataTypes.Motion))
+                    {
+                        RecordMotion(DataTypes.Motion);
+                        motionStringBuilder = new StringBuilder();
+                    }
+                    else if (dataType.equals(DataTypes.Audio))
+                    {
+                        RecordAudio(DataTypes.Audio);
+                    }
+                }
+
+                return;
             }
 
-            if (secondsTextView.getText().toString().equals(String.valueOf(99)))
-            {
-                incrementBtn.setEnabled(false);
-            }
-            else
-            {
-                incrementBtn.setEnabled(true);
-            }
-
-            if (secondsTextView.getText().toString().equals(String.valueOf(0)))
-            {
-                decrementBtn.setEnabled(false);
-                recordBtn.setEnabled(false);
-            }
-            else
-            {
-                decrementBtn.setEnabled(true);
-                recordBtn.setEnabled(true);
-            }
-
-            stopBtn.setEnabled(false);
-            recordingTitleEditView.setEnabled(true);
-            recordingTitleEditView.setHint("Set title...");
+            RecordingOff();
+            Recording = false;
+            Toast.makeText(context, title + " has been saved", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -390,8 +414,6 @@ public class NewRecordingManager
 
     private boolean PrepareForRecording()
     {
-        incrementBtn.setEnabled(false);
-        decrementBtn.setEnabled(false);
         recordBtn.setEnabled(false);
         recordingTitleEditView.setEnabled(false);
         stopBtn.setEnabled(true);
@@ -484,8 +506,3 @@ public class NewRecordingManager
     }
     //endregion
 }
-
-
-
-
-
