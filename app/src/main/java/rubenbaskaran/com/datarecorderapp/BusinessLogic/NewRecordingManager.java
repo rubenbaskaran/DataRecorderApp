@@ -96,6 +96,7 @@ public class NewRecordingManager
     public void Stop()
     {
         RecordingOff();
+        Recording = false;
         length = String.valueOf(startLength - counter);
         counter = 1;
         repeats = 1;
