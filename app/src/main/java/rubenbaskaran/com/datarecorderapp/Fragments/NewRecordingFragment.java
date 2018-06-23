@@ -198,6 +198,10 @@ public class NewRecordingFragment extends Fragment
                 motionButton.setEnabled(true);
                 dataType = DataTypes.Audio;
                 secondsEditText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(2)});
+                if (Integer.parseInt(secondsEditText.getText().toString()) > 99)
+                {
+                    secondsEditText.setText("99");
+                }
             }
             else if (v.getTag().equals("motion"))
             {
