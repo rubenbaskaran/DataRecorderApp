@@ -82,7 +82,7 @@
                     android:layout_height="0dp"
                     android:layout_weight="1"
                     android:gravity="center"
-                    android:text="length(s)"/>
+                    android:text="length"/>
 
                 <Space
                     android:layout_width="match_parent"
@@ -116,7 +116,7 @@
                     android:layout_height="0dp"
                     android:layout_weight="1"
                     android:gravity="center"
-                    android:text="interval(s)"/>
+                    android:text="interval"/>
 
                 <Space
                     android:layout_width="match_parent"
