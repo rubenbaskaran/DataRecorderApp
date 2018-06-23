@@ -98,12 +98,8 @@ public class NewRecordingManager
         RecordingOff();
         Recording = false;
         length = String.valueOf(startLength - counter);
-        counter = 1;
-
-        if(!repeatsEditText.getText().toString().equals(""))
-        {
-            repeats = 0;
-        }
+        setCounter(0);
+        setRepeats(0);
     }
     //endregion
 
@@ -330,7 +326,7 @@ public class NewRecordingManager
             counter = sharedPreferences.getInt("length", 0);
             secondsTextView.setText(String.valueOf(counter));
 
-            if (repeats != null && repeats > 0)
+            if (repeats != null && repeats > 0 && Recording)
             {
                 if (interval != null && interval > 0)
                 {
